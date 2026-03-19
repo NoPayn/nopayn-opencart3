@@ -77,8 +77,10 @@ class Nopayn extends \Opencart\System\Engine\Controller {
             return;
         }
 
-        $amountCents = (int)round((float)$order['total'] * 100);
         $currency = $order['currency_code'];
+        $currencyValue = (float)$order['currency_value'];
+        $amountInCurrency = (float)$order['total'] * ($currencyValue ?: 1.0);
+        $amountCents = (int)round($amountInCurrency * 100);
 
         $pendingStatusId = (int)$this->config->get('payment_nopayn_pending_status_id');
         if ($pendingStatusId) {
@@ -114,7 +116,9 @@ class Nopayn extends \Opencart\System\Engine\Controller {
             'return_url'        => $returnUrl,
             'failure_url'       => $failureUrl,
             'webhook_url'       => $webhookUrl,
-            'payment_methods'   => [$nopaynMethod],
+            'transactions'      => [
+                ['payment_method' => $nopaynMethod],
+            ],
         ];
 
         $locale = self::LOCALE_MAP[strtolower($lang)] ?? '';
