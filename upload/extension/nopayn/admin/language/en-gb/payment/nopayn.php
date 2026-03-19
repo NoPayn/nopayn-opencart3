@@ -1,11 +1,12 @@
 <?php
-// Heading
-$_['heading_title']                = 'NoPayn Payment Gateway';
+// Heading — OpenCart uses $code . '_heading_title' on the extensions listing page
+$_['heading_title']                = 'NoPayn Checkout';
+$_['nopayn_heading_title']         = 'NoPayn Checkout';
 
 // Text
 $_['text_extension']               = 'Extensions';
-$_['text_success']                 = 'Success: You have modified NoPayn payment settings!';
-$_['text_edit']                    = 'Edit NoPayn Settings';
+$_['text_success']                 = 'Success: You have modified NoPayn Checkout settings!';
+$_['text_edit']                    = 'Edit NoPayn Checkout';
 $_['text_all_zones']               = 'All Zones';
 $_['text_payment_methods']         = 'Payment Methods';
 $_['text_payment_methods_help']    = 'Enable the payment methods you have been approved for in your NoPayn dashboard.';
@@ -28,4 +29,4 @@ $_['entry_googlepay']              = 'Google Pay';
 $_['entry_mobilepay']              = 'Vipps / MobilePay';
 
 // Error
-$_['error_permission']             = 'Warning: You do not have permission to modify NoPayn payment settings!';
+$_['error_permission']             = 'Warning: You do not have permission to modify NoPayn Checkout settings!';

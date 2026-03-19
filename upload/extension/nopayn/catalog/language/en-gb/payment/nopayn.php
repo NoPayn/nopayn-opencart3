@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']        = 'NoPayn Payment Gateway';
+$_['heading_title']        = 'NoPayn Checkout';
 
 // Text
 $_['text_creditcard']      = 'Credit / Debit Card';
