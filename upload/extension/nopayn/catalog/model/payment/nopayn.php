@@ -72,28 +72,17 @@ class Nopayn extends \Opencart\System\Engine\Model {
         return $method_data;
     }
 
-    public function addTransaction(int $orderId, string $nopaynOrderId, string $paymentMethod, int $amount, string $currency, string $captureMode = 'auto', string $nopaynTransactionId = ''): void {
+    public function addTransaction(int $orderId, string $nopaynOrderId, string $paymentMethod, int $amount, string $currency): void {
         $this->db->query(
             "INSERT INTO `" . DB_PREFIX . "nopayn_transactions` SET "
             . "`order_id` = '" . (int)$orderId . "', "
             . "`nopayn_order_id` = '" . $this->db->escape($nopaynOrderId) . "', "
-            . "`nopayn_transaction_id` = '" . $this->db->escape($nopaynTransactionId) . "', "
             . "`payment_method` = '" . $this->db->escape($paymentMethod) . "', "
             . "`amount` = '" . (int)$amount . "', "
             . "`currency` = '" . $this->db->escape($currency) . "', "
             . "`status` = 'new', "
-            . "`capture_mode` = '" . $this->db->escape($captureMode) . "', "
             . "`created_at` = NOW(), "
             . "`updated_at` = NOW()"
-        );
-    }
-
-    public function updateTransactionNopaynTransactionId(string $nopaynOrderId, string $nopaynTransactionId): void {
-        $this->db->query(
-            "UPDATE `" . DB_PREFIX . "nopayn_transactions` SET "
-            . "`nopayn_transaction_id` = '" . $this->db->escape($nopaynTransactionId) . "', "
-            . "`updated_at` = NOW() "
-            . "WHERE `nopayn_order_id` = '" . $this->db->escape($nopaynOrderId) . "'"
         );
     }
 
@@ -108,7 +97,7 @@ class Nopayn extends \Opencart\System\Engine\Model {
     public function getTransactionByOrderId(int $orderId): array {
         $query = $this->db->query(
             "SELECT * FROM `" . DB_PREFIX . "nopayn_transactions` "
-            . "WHERE `order_id` = '" . (int)$orderId . "' ORDER BY `transaction_id` DESC LIMIT 1"
+            . "WHERE `order_id` = '" . (int)$orderId . "' ORDER BY `id` DESC LIMIT 1"
         );
         return $query->row ?: [];
     }

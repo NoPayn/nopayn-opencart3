@@ -24,13 +24,9 @@ $_['entry_geo_zone']               = 'Geo Zone';
 $_['entry_status']                 = 'Status';
 $_['entry_sort_order']             = 'Sort Order';
 $_['entry_creditcard']             = 'Credit / Debit Card';
-$_['entry_creditcard_manual_capture'] = 'Manual Capture (Credit Card)';
-$_['entry_creditcard_manual_capture_help'] = 'When enabled, credit card payments are authorized but not captured automatically. Capture happens when the order is completed.';
 $_['entry_applepay']               = 'Apple Pay';
 $_['entry_googlepay']              = 'Google Pay';
 $_['entry_mobilepay']              = 'Vipps / MobilePay';
-$_['entry_debug_logging']          = 'Debug Logging';
-$_['entry_debug_logging_help']     = 'Enable detailed logging of all NoPayn API requests, responses, and webhook events. Logs are written to the OpenCart log directory.';
 
 // Error
 $_['error_permission']             = 'Warning: You do not have permission to modify NoPayn Checkout settings!';

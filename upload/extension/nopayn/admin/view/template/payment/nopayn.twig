@@ -43,17 +43,6 @@
             </div>
 
             <div class="row mb-3">
-              <label class="col-sm-2 col-form-label">{{ entry_creditcard_manual_capture }}</label>
-              <div class="col-sm-10">
-                <div class="form-check form-switch form-switch-lg">
-                  <input type="hidden" name="payment_nopayn_creditcard_manual_capture" value="0" />
-                  <input type="checkbox" name="payment_nopayn_creditcard_manual_capture" value="1" id="input-creditcard-manual-capture" class="form-check-input"{% if payment_nopayn_creditcard_manual_capture %} checked{% endif %} />
-                </div>
-                <div class="form-text">{{ entry_creditcard_manual_capture_help }}</div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
               <label class="col-sm-2 col-form-label">{{ entry_applepay }}</label>
               <div class="col-sm-10">
                 <div class="form-check form-switch form-switch-lg">
@@ -146,17 +135,6 @@
             <label for="input-sort-order" class="col-sm-2 col-form-label">{{ entry_sort_order }}</label>
             <div class="col-sm-10">
               <input type="text" name="payment_nopayn_sort_order" value="{{ payment_nopayn_sort_order }}" id="input-sort-order" class="form-control" />
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <label class="col-sm-2 col-form-label">{{ entry_debug_logging }}</label>
-            <div class="col-sm-10">
-              <div class="form-check form-switch form-switch-lg">
-                <input type="hidden" name="payment_nopayn_debug_logging" value="0" />
-                <input type="checkbox" name="payment_nopayn_debug_logging" value="1" id="input-debug-logging" class="form-check-input"{% if payment_nopayn_debug_logging %} checked{% endif %} />
-              </div>
-              <div class="form-text">{{ entry_debug_logging_help }}</div>
             </div>
           </div>
 

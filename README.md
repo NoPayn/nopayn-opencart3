@@ -1,4 +1,4 @@
-# NoPayn Payment Gateway for OpenCart 4
+# NoPayn Checkout for OpenCart 4
 
 Accept payments via [NoPayn/Cost+](https://costplus.io) in your OpenCart 4 store.
 
@@ -15,22 +15,42 @@ Accept payments via [NoPayn/Cost+](https://costplus.io) in your OpenCart 4 store
 - PHP 8.0 or later
 - A NoPayn merchant account ([sign up](https://manage.nopayn.io/))
 
+## Release Assets
+
+Each tagged release publishes an installer-ready `.ocmod.zip` asset named like `nopayn-opencart-vX.Y.Z.ocmod.zip`.
+
+Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)` downloads for OpenCart installation. Those archives contain the repository layout, not the installer layout that OpenCart expects.
+
 ## Installation
 
 ### Method A: Upload via Admin Panel
 
-1. Download the latest release `.ocmod.zip` from [Releases](https://github.com/NoPayn/nopayn-opencart/releases)
+1. Download the `.ocmod.zip` asset attached to the latest [Release](https://github.com/NoPayn/nopayn-opencart/releases)
 2. In your OpenCart admin, go to **Extensions → Installer**
 3. Upload the `.ocmod.zip` file
 4. Go to **Extensions → Extensions → Payment**
-5. Find **NoPayn Payment Gateway** and click **Install**, then **Edit**
+5. Find **NoPayn Checkout** and click **Install**, then **Edit**
 
 ### Method B: Manual Upload
 
 1. Download or clone this repository
 2. Copy the contents of `upload/` into your OpenCart root directory
 3. Go to **Extensions → Extensions → Payment**
-4. Find **NoPayn Payment Gateway** and click **Install**, then **Edit**
+4. Find **NoPayn Checkout** and click **Install**, then **Edit**
+
+## Build the Installer Package Locally
+
+Run:
+
+```bash
+python3 scripts/build_ocmod.py
+```
+
+This creates an installer-ready package in `dist/`, for example `dist/nopayn-opencart-vX.Y.Z.ocmod.zip`.
+
+## Release Process
+
+Pushing a `v*` tag triggers the GitHub Actions workflow in `.github/workflows/package-release.yml`, which builds the `.ocmod.zip` package and attaches it to the GitHub release automatically.
 
 ## Configuration
 
