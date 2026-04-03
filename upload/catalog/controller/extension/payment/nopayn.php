@@ -1,6 +1,12 @@
 <?php
 class ControllerExtensionPaymentNopayn extends Controller {
 	private const API_BASE_URL = 'https://api.nopayn.co.uk';
+	private const ALLOWED_MODULES = array(
+		'nopayn_card',
+		'nopayn_wallets',
+		'nopayn_vippsmobilepay',
+		'nopayn_swishpay'
+	);
 
 	private const LOCALE_MAP = array(
 		'en-gb' => 'en-GB',
@@ -13,38 +19,14 @@ class ControllerExtensionPaymentNopayn extends Controller {
 	);
 
 	public function index() {
-		$this->load->language('extension/payment/nopayn');
-
-		$enabled_methods = array_values($this->getEnabledMethods());
-
-		if (!$enabled_methods) {
-			return '';
-		}
-
-		$selected_method = $enabled_methods[0]['code'];
-
-		if (isset($this->session->data['nopayn_selected_method'])) {
-			foreach ($enabled_methods as $enabled_method) {
-				if ($enabled_method['code'] === $this->session->data['nopayn_selected_method']) {
-					$selected_method = $enabled_method['code'];
-					break;
-				}
-			}
-		}
-
-		$data['enabled_methods'] = $enabled_methods;
-		$data['selected_method'] = $selected_method;
-		$data['confirm_url'] = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/confirm', '', true));
-		$data['button_confirm'] = $this->languageValue('button_confirm', 'Confirm Order');
-		$data['text_loading'] = $this->languageValue('text_loading', 'Loading...');
-
-		return $this->load->view('extension/payment/nopayn', $data);
+		return '';
 	}
 
 	public function confirm() {
-		$this->load->language('extension/payment/nopayn');
-
 		$json = array();
+		$module_code = $this->resolveModuleCode();
+
+		$this->loadModuleLanguage($module_code);
 
 		if (!isset($this->session->data['order_id'])) {
 			$json['error'] = $this->language->get('error_order');
@@ -52,10 +34,12 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			return;
 		}
 
-		$enabled_methods = $this->getEnabledMethods();
-		$selected_method = isset($this->request->post['nopayn_method']) ? $this->request->post['nopayn_method'] : '';
+		$this->load->model('extension/payment/nopayn');
 
-		if (!$selected_method || !isset($enabled_methods[$selected_method])) {
+		$requested_payment_methods = $this->model_extension_payment_nopayn->getRequestedPaymentMethods($module_code);
+		$transaction_entries = $this->model_extension_payment_nopayn->getTransactionEntries($module_code);
+
+		if (!$module_code || !$requested_payment_methods || !$transaction_entries) {
 			$json['error'] = $this->language->get('error_payment_method');
 			$this->respondJson($json);
 			return;
@@ -95,20 +79,15 @@ class ControllerExtensionPaymentNopayn extends Controller {
 
 		$this->session->data['nopayn_token'] = $token;
 		$this->session->data['nopayn_order_id_shop'] = $order_id;
-		$this->session->data['nopayn_selected_method'] = $selected_method;
+		$this->session->data['nopayn_module_code'] = $module_code;
 
-		$return_url = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/callback', 'token=' . $token . '&oid=' . $order_id, true));
-		$failure_url = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/callback', 'token=' . $token . '&oid=' . $order_id . '&status=failure', true));
+		$return_url = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/callback', 'module=' . $module_code . '&token=' . $token . '&oid=' . $order_id, true));
+		$failure_url = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/callback', 'module=' . $module_code . '&token=' . $token . '&oid=' . $order_id . '&status=failure', true));
 		$webhook_url = str_replace('&amp;', '&', $this->url->link('extension/payment/nopayn/webhook', '', true));
-
-		$transaction_entry = array(
-			'payment_method' => $enabled_methods[$selected_method]['payment_method']
-		);
 
 		$capture_mode = 'auto';
 
-		if ($selected_method === 'nopayn_creditcard' && $this->config->get('payment_nopayn_creditcard_manual_capture')) {
-			$transaction_entry['capture_mode'] = 'manual';
+		if ($this->model_extension_payment_nopayn->isManualCapture($module_code)) {
 			$capture_mode = 'manual';
 		}
 
@@ -120,7 +99,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			'return_url' => $return_url,
 			'failure_url' => $failure_url,
 			'webhook_url' => $webhook_url,
-			'transactions' => array($transaction_entry)
+			'transactions' => $transaction_entries
 		);
 
 		$order_lines = $this->buildOrderLines($order_id, $currency, $currency_value);
@@ -135,7 +114,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			$params['locale'] = self::LOCALE_MAP[$language_code];
 		}
 
-		$this->log('confirm: Creating order for shop order #' . $order_id . ' method=' . $selected_method . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode);
+		$this->log('confirm: Creating order for shop order #' . $order_id . ' module=' . $module_code . ' methods=' . implode(',', $requested_payment_methods) . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode);
 
 		$response = $this->apiRequest('POST', '/v1/orders/', $api_key, $params);
 
@@ -146,15 +125,8 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		}
 
 		$nopayn_order_id = isset($response['id']) ? $response['id'] : '';
-		$payment_url = '';
-		$nopayn_transaction_id = '';
-
-		if (!empty($response['transactions'][0]['payment_url'])) {
-			$payment_url = $response['transactions'][0]['payment_url'];
-			$nopayn_transaction_id = !empty($response['transactions'][0]['id']) ? $response['transactions'][0]['id'] : '';
-		} elseif (!empty($response['order_url'])) {
-			$payment_url = $response['order_url'];
-		}
+		$payment_url = $this->resolvePaymentUrl($response, count($transaction_entries) > 1);
+		$nopayn_transaction_id = $this->extractTransactionValue($response, 'id');
 
 		if (!$nopayn_order_id || !$payment_url) {
 			$json['error'] = $this->language->get('error_gateway');
@@ -162,15 +134,15 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			return;
 		}
 
-		$this->load->model('extension/payment/nopayn');
 		$this->model_extension_payment_nopayn->addTransaction(
 			$order_id,
 			$nopayn_order_id,
-			$enabled_methods[$selected_method]['payment_method'],
+			implode(',', $requested_payment_methods),
 			$amount_cents,
 			$currency,
 			$capture_mode,
-			$nopayn_transaction_id
+			$nopayn_transaction_id,
+			$module_code
 		);
 
 		$this->session->data['nopayn_order_id'] = $nopayn_order_id;
@@ -183,9 +155,11 @@ class ControllerExtensionPaymentNopayn extends Controller {
 	}
 
 	public function callback() {
-		$this->load->language('extension/payment/nopayn');
 		$this->load->model('extension/payment/nopayn');
 		$this->load->model('checkout/order');
+
+		$module_code = $this->resolveModuleCode();
+		$this->loadModuleLanguage($module_code);
 
 		$token = isset($this->request->get['token']) ? $this->request->get['token'] : '';
 		$order_id = isset($this->request->get['oid']) ? (int)$this->request->get['oid'] : 0;
@@ -197,6 +171,8 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		if (!$token || !$order_id || !$session_token || !hash_equals($session_token, $token)) {
 			$transaction = $this->model_extension_payment_nopayn->getTransactionByOrderId($order_id);
 			$nopayn_order_id = !empty($transaction['nopayn_order_id']) ? $transaction['nopayn_order_id'] : '';
+			$module_code = !empty($transaction['extension_code']) ? $transaction['extension_code'] : $module_code;
+			$this->loadModuleLanguage($module_code);
 		}
 
 		if ($failure_flag || !$nopayn_order_id) {
@@ -222,8 +198,15 @@ class ControllerExtensionPaymentNopayn extends Controller {
 
 		$this->log('callback: order_id=' . $order_id . ' nopayn_order_id=' . $nopayn_order_id . ' api_status=' . $status);
 
-		if (!empty($response['transactions'][0]['id'])) {
-			$this->model_extension_payment_nopayn->updateTransactionNopaynTransactionId($nopayn_order_id, $response['transactions'][0]['id']);
+		$transaction_id = $this->extractTransactionValue($response, 'id');
+		$payment_method = $this->extractTransactionValue($response, 'payment_method');
+
+		if ($transaction_id) {
+			$this->model_extension_payment_nopayn->updateTransactionNopaynTransactionId($nopayn_order_id, $transaction_id);
+		}
+
+		if ($payment_method) {
+			$this->model_extension_payment_nopayn->updateTransactionPaymentMethod($nopayn_order_id, $payment_method);
 		}
 
 		if ($status === 'completed') {
@@ -306,9 +289,17 @@ class ControllerExtensionPaymentNopayn extends Controller {
 
 		$this->log('webhook: nopayn_order_id=' . $nopayn_order_id . ' api_status=' . $api_status . ' capture_mode=' . (isset($transaction['capture_mode']) ? $transaction['capture_mode'] : 'auto'));
 
-		if (!empty($response['transactions'][0]['id'])) {
-			$this->model_extension_payment_nopayn->updateTransactionNopaynTransactionId($nopayn_order_id, $response['transactions'][0]['id']);
-			$transaction['nopayn_transaction_id'] = $response['transactions'][0]['id'];
+		$transaction_id = $this->extractTransactionValue($response, 'id');
+		$payment_method = $this->extractTransactionValue($response, 'payment_method');
+
+		if ($transaction_id) {
+			$this->model_extension_payment_nopayn->updateTransactionNopaynTransactionId($nopayn_order_id, $transaction_id);
+			$transaction['nopayn_transaction_id'] = $transaction_id;
+		}
+
+		if ($payment_method) {
+			$this->model_extension_payment_nopayn->updateTransactionPaymentMethod($nopayn_order_id, $payment_method);
+			$transaction['payment_method'] = $payment_method;
 		}
 
 		$this->load->model('checkout/order');
@@ -506,44 +497,6 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		return $this->apiRequest('POST', $endpoint, $api_key, $body);
 	}
 
-	private function getEnabledMethods() {
-		$methods = array();
-
-		if ($this->config->get('payment_nopayn_creditcard')) {
-			$methods['nopayn_creditcard'] = array(
-				'code' => 'nopayn_creditcard',
-				'payment_method' => 'credit-card',
-				'title' => $this->language->get('text_creditcard')
-			);
-		}
-
-		if ($this->config->get('payment_nopayn_applepay')) {
-			$methods['nopayn_applepay'] = array(
-				'code' => 'nopayn_applepay',
-				'payment_method' => 'apple-pay',
-				'title' => $this->language->get('text_applepay')
-			);
-		}
-
-		if ($this->config->get('payment_nopayn_googlepay')) {
-			$methods['nopayn_googlepay'] = array(
-				'code' => 'nopayn_googlepay',
-				'payment_method' => 'google-pay',
-				'title' => $this->language->get('text_googlepay')
-			);
-		}
-
-		if ($this->config->get('payment_nopayn_mobilepay')) {
-			$methods['nopayn_mobilepay'] = array(
-				'code' => 'nopayn_mobilepay',
-				'payment_method' => 'vipps-mobilepay',
-				'title' => $this->language->get('text_mobilepay')
-			);
-		}
-
-		return $methods;
-	}
-
 	private function handleFailure($order_id, $message) {
 		$cancelled_status_id = (int)$this->config->get('payment_nopayn_cancelled_status_id');
 
@@ -561,7 +514,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			$this->session->data['nopayn_token'],
 			$this->session->data['nopayn_order_id'],
 			$this->session->data['nopayn_order_id_shop'],
-			$this->session->data['nopayn_selected_method']
+			$this->session->data['nopayn_module_code']
 		);
 	}
 
@@ -599,5 +552,63 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		$value = $this->language->get($key);
 
 		return $value === $key ? $fallback : $value;
+	}
+
+	private function resolveModuleCode() {
+		$module_code = '';
+
+		if (!empty($this->request->get['module'])) {
+			$module_code = $this->request->get['module'];
+		} elseif (!empty($this->request->post['nopayn_module_code'])) {
+			$module_code = $this->request->post['nopayn_module_code'];
+		} elseif (!empty($this->session->data['payment_method']['code'])) {
+			$module_code = $this->session->data['payment_method']['code'];
+		} elseif (!empty($this->session->data['nopayn_module_code'])) {
+			$module_code = $this->session->data['nopayn_module_code'];
+		}
+
+		return in_array($module_code, self::ALLOWED_MODULES, true) ? $module_code : '';
+	}
+
+	private function loadModuleLanguage($module_code) {
+		$this->load->language('extension/payment/nopayn');
+
+		if ($module_code && in_array($module_code, self::ALLOWED_MODULES, true)) {
+			$this->load->language('extension/payment/' . $module_code);
+		}
+	}
+
+	private function resolvePaymentUrl($response, $prefer_order_url) {
+		if ($prefer_order_url && !empty($response['order_url'])) {
+			return $response['order_url'];
+		}
+
+		if (!empty($response['transactions']) && is_array($response['transactions'])) {
+			foreach ($response['transactions'] as $transaction) {
+				if (!empty($transaction['payment_url'])) {
+					return $transaction['payment_url'];
+				}
+			}
+		}
+
+		if (!empty($response['order_url'])) {
+			return $response['order_url'];
+		}
+
+		return '';
+	}
+
+	private function extractTransactionValue($response, $key) {
+		if (empty($response['transactions']) || !is_array($response['transactions'])) {
+			return '';
+		}
+
+		foreach ($response['transactions'] as $transaction) {
+			if (!empty($transaction[$key])) {
+				return $transaction[$key];
+			}
+		}
+
+		return '';
 	}
 }

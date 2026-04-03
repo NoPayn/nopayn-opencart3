@@ -10,7 +10,9 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('payment_nopayn', $this->request->post);
+			$post_data = $this->request->post;
+			$post_data['payment_nopayn_status'] = 1;
+			$this->model_setting_setting->editSetting('payment_nopayn', $post_data);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -48,13 +50,11 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			'payment_nopayn_order_status_id',
 			'payment_nopayn_pending_status_id',
 			'payment_nopayn_cancelled_status_id',
-			'payment_nopayn_geo_zone_id',
-			'payment_nopayn_status',
-			'payment_nopayn_sort_order',
 			'payment_nopayn_creditcard',
 			'payment_nopayn_applepay',
 			'payment_nopayn_googlepay',
 			'payment_nopayn_mobilepay',
+			'payment_nopayn_swish',
 			'payment_nopayn_creditcard_manual_capture',
 			'payment_nopayn_debug_logging'
 		);
@@ -83,6 +83,11 @@ class ControllerExtensionPaymentNopayn extends Controller {
 	public function install() {
 		$this->load->model('extension/payment/nopayn');
 		$this->model_extension_payment_nopayn->install();
+
+		$this->load->model('setting/setting');
+		$settings = $this->model_setting_setting->getSetting('payment_nopayn');
+		$settings['payment_nopayn_status'] = 1;
+		$this->model_setting_setting->editSetting('payment_nopayn', $settings);
 	}
 
 	public function uninstall() {

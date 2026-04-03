@@ -1,9 +1,11 @@
 <?php
 class ModelExtensionPaymentNopayn extends Model {
 	public function getMethod($address, $total) {
-		$this->load->language('extension/payment/nopayn');
+		return array();
+	}
 
-		if ($this->config->get('payment_nopayn_status') != 1) {
+	public function getMethodData($address, $total, $module_code) {
+		if ($this->config->get('payment_' . $module_code . '_status') != 1) {
 			return array();
 		}
 
@@ -11,12 +13,7 @@ class ModelExtensionPaymentNopayn extends Model {
 			return array();
 		}
 
-		if (
-			!$this->config->get('payment_nopayn_creditcard') &&
-			!$this->config->get('payment_nopayn_applepay') &&
-			!$this->config->get('payment_nopayn_googlepay') &&
-			!$this->config->get('payment_nopayn_mobilepay')
-		) {
+		if (!$this->getRequestedPaymentMethods($module_code)) {
 			return array();
 		}
 
@@ -24,35 +21,76 @@ class ModelExtensionPaymentNopayn extends Model {
 			return array();
 		}
 
-		if (!$this->config->get('payment_nopayn_geo_zone_id')) {
-			$status = true;
-		} else {
-			$query = $this->db->query(
-				"SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone` "
-				. "WHERE `geo_zone_id` = '" . (int)$this->config->get('payment_nopayn_geo_zone_id') . "' "
-				. "AND `country_id` = '" . (int)$address['country_id'] . "' "
-				. "AND (`zone_id` = '" . (int)$address['zone_id'] . "' OR `zone_id` = '0')"
-			);
+		$geo_zone_id = (int)$this->config->get('payment_' . $module_code . '_geo_zone_id');
 
-			$status = (bool)$query->num_rows;
-		}
-
-		if (!$status) {
+		if (!$this->isAddressInGeoZone($geo_zone_id, $address)) {
 			return array();
 		}
 
 		return array(
-			'code' => 'nopayn',
-			'title' => $this->language->get('text_title'),
+			'code' => $module_code,
+			'title' => $this->getCheckoutTitle($module_code),
 			'terms' => '',
-			'sort_order' => $this->config->get('payment_nopayn_sort_order')
+			'sort_order' => (int)$this->config->get('payment_' . $module_code . '_sort_order')
 		);
 	}
 
-	public function addTransaction($order_id, $nopayn_order_id, $payment_method, $amount, $currency, $capture_mode = 'auto', $nopayn_transaction_id = '') {
+	public function getRequestedPaymentMethods($module_code) {
+		switch ($module_code) {
+			case 'nopayn_card':
+				return $this->config->get('payment_nopayn_creditcard') ? array('credit-card') : array();
+
+			case 'nopayn_wallets':
+				$methods = array();
+
+				if ($this->config->get('payment_nopayn_applepay')) {
+					$methods[] = 'apple-pay';
+				}
+
+				if ($this->config->get('payment_nopayn_googlepay')) {
+					$methods[] = 'google-pay';
+				}
+
+				return $methods;
+
+			case 'nopayn_vippsmobilepay':
+				return $this->config->get('payment_nopayn_mobilepay') ? array('vipps-mobilepay') : array();
+
+			case 'nopayn_swishpay':
+				return $this->config->get('payment_nopayn_swish') ? array('swish') : array();
+
+			default:
+				return array();
+		}
+	}
+
+	public function getTransactionEntries($module_code) {
+		$entries = array();
+
+		foreach ($this->getRequestedPaymentMethods($module_code) as $payment_method) {
+			$entry = array(
+				'payment_method' => $payment_method
+			);
+
+			if ($module_code === 'nopayn_card' && $this->config->get('payment_nopayn_creditcard_manual_capture')) {
+				$entry['capture_mode'] = 'manual';
+			}
+
+			$entries[] = $entry;
+		}
+
+		return $entries;
+	}
+
+	public function isManualCapture($module_code) {
+		return $module_code === 'nopayn_card' && $this->config->get('payment_nopayn_creditcard_manual_capture');
+	}
+
+	public function addTransaction($order_id, $nopayn_order_id, $payment_method, $amount, $currency, $capture_mode = 'auto', $nopayn_transaction_id = '', $extension_code = '') {
 		$this->db->query(
 			"INSERT INTO `" . DB_PREFIX . "nopayn_transactions` SET "
 			. "`order_id` = '" . (int)$order_id . "', "
+			. "`extension_code` = '" . $this->db->escape($extension_code) . "', "
 			. "`nopayn_order_id` = '" . $this->db->escape($nopayn_order_id) . "', "
 			. "`nopayn_transaction_id` = '" . $this->db->escape($nopayn_transaction_id) . "', "
 			. "`payment_method` = '" . $this->db->escape($payment_method) . "', "
@@ -99,5 +137,51 @@ class ModelExtensionPaymentNopayn extends Model {
 			. "`updated_at` = NOW() "
 			. "WHERE `nopayn_order_id` = '" . $this->db->escape($nopayn_order_id) . "'"
 		);
+	}
+
+	public function updateTransactionPaymentMethod($nopayn_order_id, $payment_method) {
+		$this->db->query(
+			"UPDATE `" . DB_PREFIX . "nopayn_transactions` SET "
+			. "`payment_method` = '" . $this->db->escape($payment_method) . "', "
+			. "`updated_at` = NOW() "
+			. "WHERE `nopayn_order_id` = '" . $this->db->escape($nopayn_order_id) . "'"
+		);
+	}
+
+	private function getCheckoutTitle($module_code) {
+		if ($module_code === 'nopayn_wallets') {
+			$requested_methods = $this->getRequestedPaymentMethods($module_code);
+
+			if ($requested_methods === array('apple-pay')) {
+				$value = $this->language->get('text_title_apple');
+
+				return $value !== 'text_title_apple' ? $value : 'Apple Pay';
+			}
+
+			if ($requested_methods === array('google-pay')) {
+				$value = $this->language->get('text_title_google');
+
+				return $value !== 'text_title_google' ? $value : 'Google Pay';
+			}
+		}
+
+		$value = $this->language->get('text_title');
+
+		return $value !== 'text_title' ? $value : 'Payment';
+	}
+
+	private function isAddressInGeoZone($geo_zone_id, $address) {
+		if (!$geo_zone_id) {
+			return true;
+		}
+
+		$query = $this->db->query(
+			"SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone` "
+			. "WHERE `geo_zone_id` = '" . (int)$geo_zone_id . "' "
+			. "AND `country_id` = '" . (int)$address['country_id'] . "' "
+			. "AND (`zone_id` = '" . (int)$address['zone_id'] . "' OR `zone_id` = '0')"
+		);
+
+		return (bool)$query->num_rows;
 	}
 }

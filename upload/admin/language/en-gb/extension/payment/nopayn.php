@@ -1,31 +1,30 @@
 <?php
 // Heading
-$_['heading_title']                          = 'NoPayn Checkout';
-$_['nopayn_heading_title']                   = 'NoPayn Checkout';
+$_['heading_title']                          = 'NoPayn - Global Settings';
+$_['nopayn_heading_title']                   = 'NoPayn - Global Settings';
 
 // Text
 $_['text_extension']                         = 'Extensions';
-$_['text_success']                           = 'Success: You have modified NoPayn Checkout settings!';
-$_['text_edit']                              = 'Edit NoPayn Checkout';
+$_['text_success']                           = 'Success: You have modified NoPayn global settings!';
+$_['text_edit']                              = 'Edit NoPayn - Global Settings';
 $_['text_all_zones']                         = 'All Zones';
 $_['text_enabled']                           = 'Enabled';
 $_['text_disabled']                          = 'Disabled';
-$_['text_payment_methods']                   = 'Payment Methods';
-$_['text_payment_methods_help']              = 'Enable the payment methods you have been approved for in your NoPayn dashboard.';
+$_['text_payment_methods']                    = 'Available NoPayn Methods';
+$_['text_payment_methods_help']               = 'Enable the NoPayn methods your merchant account is approved to offer. The separate NoPayn checkout modules use these switches.';
+$_['text_checkout_modules_help']              = 'Install and configure the separate NoPayn payment extensions to control checkout labels, geo zones, and sort order.';
 
 // Entry
 $_['entry_api_key']                          = 'API Key';
 $_['entry_order_status']                     = 'Completed Order Status';
 $_['entry_pending_status']                   = 'Pending Order Status';
 $_['entry_cancelled_status']                 = 'Cancelled Order Status';
-$_['entry_geo_zone']                         = 'Geo Zone';
-$_['entry_status']                           = 'Status';
-$_['entry_sort_order']                       = 'Sort Order';
 $_['entry_creditcard']                       = 'Credit / Debit Card';
 $_['entry_creditcard_manual_capture']        = 'Manual Capture (Credit Card)';
 $_['entry_applepay']                         = 'Apple Pay';
 $_['entry_googlepay']                        = 'Google Pay';
 $_['entry_mobilepay']                        = 'Vipps / MobilePay';
+$_['entry_swish']                             = 'Swish';
 $_['entry_debug_logging']                    = 'Debug Logging';
 
 // Help
@@ -37,4 +36,4 @@ $_['help_creditcard_manual_capture']         = 'When enabled, credit card paymen
 $_['help_debug_logging']                     = 'Write NoPayn API requests, responses, and webhook events to the store log.';
 
 // Error
-$_['error_permission']                       = 'Warning: You do not have permission to modify NoPayn Checkout settings!';
+$_['error_permission']                        = 'Warning: You do not have permission to modify NoPayn global settings!';

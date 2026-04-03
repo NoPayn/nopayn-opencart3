@@ -1,19 +1,5 @@
 <p>{{ text_redirect }}</p>
-
-{% if enabled_methods|length > 1 %}
-<p><strong>{{ text_select_payment_method }}</strong></p>
-{% for enabled_method in enabled_methods %}
-<div class="radio">
-  <label>
-    <input type="radio" name="nopayn_method" value="{{ enabled_method.code }}" {% if enabled_method.code == selected_method %}checked="checked"{% endif %} />
-    {{ enabled_method.title }}
-  </label>
-</div>
-{% endfor %}
-{% else %}
-<input type="hidden" name="nopayn_method" value="{{ selected_method }}" />
-<p><strong>{{ enabled_methods[0].title }}</strong></p>
-{% endif %}
+<input type="hidden" name="nopayn_module_code" value="{{ module_code }}" />
 
 <div class="buttons">
   <div class="pull-right">
@@ -26,7 +12,7 @@ $('#button-confirm').bind('click', function() {
 	$.ajax({
 		url: '{{ confirm_url }}',
 		type: 'post',
-		data: $('input[name=\'nopayn_method\']:checked, input[name=\'nopayn_method\'][type=\'hidden\']'),
+		data: $('input[name=\'nopayn_module_code\']'),
 		dataType: 'json',
 		beforeSend: function() {
 			$('#button-confirm').button('loading');

@@ -32,9 +32,23 @@ def main() -> None:
 
     required_entries = {
         "upload/admin/controller/extension/payment/nopayn.php",
+        "upload/admin/controller/extension/payment/nopayn_card.php",
+        "upload/admin/controller/extension/payment/nopayn_wallets.php",
+        "upload/admin/controller/extension/payment/nopayn_vippsmobilepay.php",
+        "upload/admin/controller/extension/payment/nopayn_swishpay.php",
         "upload/admin/model/extension/payment/nopayn.php",
+        "upload/admin/view/template/extension/payment/nopayn_method.twig",
         "upload/catalog/controller/extension/payment/nopayn.php",
+        "upload/catalog/controller/extension/payment/nopayn_card.php",
+        "upload/catalog/controller/extension/payment/nopayn_wallets.php",
+        "upload/catalog/controller/extension/payment/nopayn_vippsmobilepay.php",
+        "upload/catalog/controller/extension/payment/nopayn_swishpay.php",
         "upload/catalog/model/extension/payment/nopayn.php",
+        "upload/catalog/model/extension/payment/nopayn_card.php",
+        "upload/catalog/model/extension/payment/nopayn_wallets.php",
+        "upload/catalog/model/extension/payment/nopayn_vippsmobilepay.php",
+        "upload/catalog/model/extension/payment/nopayn_swishpay.php",
+        "upload/catalog/view/theme/default/template/extension/payment/nopayn_method.twig",
     }
 
     missing_entries = sorted(required_entries.difference(names))
