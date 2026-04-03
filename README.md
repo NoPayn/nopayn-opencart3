@@ -1,77 +1,74 @@
-# NoPayn Checkout for OpenCart 4
+# NoPayn Checkout for ocStore 3 / OpenCart 3
 
-Accept payments via [NoPayn/Cost+](https://costplus.io) in your OpenCart 4 store.
+Accept payments via [NoPayn](https://nopayn.co.uk) in ocStore 3.x and OpenCart 3.x stores.
 
 ## Supported Payment Methods
 
-- **Credit / Debit Card** — Visa, Mastercard, Amex, Maestro, V Pay, Bancontact, Diners, Discover
-- **Apple Pay**
-- **Google Pay**
-- **Vipps / MobilePay**
+- Credit / Debit Card
+- Apple Pay
+- Google Pay
+- Vipps / MobilePay
 
 ## Requirements
 
-- OpenCart 4.0.0.0 or later
-- PHP 8.0 or later
-- A NoPayn merchant account ([sign up](https://manage.nopayn.io/))
+- ocStore 3.0.x or OpenCart 3.0.3.x
+- PHP 7.4 or later
+- A NoPayn merchant account
 
 ## Release Assets
 
-Each tagged release publishes an installer-ready `.ocmod.zip` asset named like `nopayn-opencart-vX.Y.Z.ocmod.zip`.
+Each tagged release publishes an installer-ready `.ocmod.zip` asset named like `nopayn-opencart3-vX.Y.Z.ocmod.zip`.
 
-Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)` downloads for OpenCart installation. Those archives contain the repository layout, not the installer layout that OpenCart expects.
+Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)` downloads for store installation. Those archives contain the repository layout, not the installer layout that the OpenCart 3 extension installer expects.
 
 ## Installation
 
 ### Method A: Upload via Admin Panel
 
-1. Download the `.ocmod.zip` asset attached to the latest [Release](https://github.com/NoPayn/nopayn-opencart/releases)
-2. In your OpenCart admin, go to **Extensions → Installer**
-3. Upload the `.ocmod.zip` file
-4. Go to **Extensions → Extensions → Payment**
-5. Find **NoPayn Checkout** and click **Install**, then **Edit**
+1. Download the `.ocmod.zip` asset from the latest [Release](https://github.com/NoPayn/nopayn-opencart3/releases).
+2. In admin, go to `Extensions -> Installer`.
+3. Upload the `.ocmod.zip` file.
+4. Go to `Extensions -> Extensions -> Payments`.
+5. Find `NoPayn Checkout`, click `Install`, then `Edit`.
 
 ### Method B: Manual Upload
 
-1. Download or clone this repository
-2. Copy the contents of `upload/` into your OpenCart root directory
-3. Go to **Extensions → Extensions → Payment**
-4. Find **NoPayn Checkout** and click **Install**, then **Edit**
+1. Download or clone this repository.
+2. Copy the contents of `upload/` into your store root.
+3. Go to `Extensions -> Extensions -> Payments`.
+4. Find `NoPayn Checkout`, click `Install`, then `Edit`.
 
 ## Build the Installer Package Locally
-
-Run:
 
 ```bash
 python3 scripts/build_ocmod.py
 ```
 
-This creates an installer-ready package in `dist/`, for example `dist/nopayn-opencart-vX.Y.Z.ocmod.zip`.
-
-## Release Process
-
-Pushing a `v*` tag triggers the GitHub Actions workflow in `.github/workflows/package-release.yml`, which builds the `.ocmod.zip` package and attaches it to the GitHub release automatically.
+This creates `dist/nopayn-opencart3-vX.Y.Z.ocmod.zip`.
 
 ## Configuration
 
-1. Enter your **API Key** (found in the [NoPayn merchant portal](https://manage.nopayn.io/) under Settings → API Key)
-2. Enable the **payment methods** you have been approved for
-3. Set your preferred **order statuses** for completed, pending, and cancelled payments
-4. Optionally restrict by **Geo Zone**
-5. Set **Status** to enabled
-6. Save
+1. Enter your NoPayn API key.
+2. Enable the payment methods you have been approved for.
+3. Set completed, pending, and cancelled order statuses.
+4. Optionally restrict the method by geo zone.
+5. Enable the extension and save.
+
+At checkout, the customer selects `NoPayn Checkout` as the payment extension and then chooses the enabled NoPayn payment method inside the confirmation panel.
 
 ## How It Works
 
-This extension uses the NoPayn **Hosted Payment Page (HPP)** flow:
+This extension uses the NoPayn hosted payment page flow:
 
-1. Customer selects a NoPayn payment method at checkout
-2. On "Confirm Order", the extension creates an order via the NoPayn API
-3. Customer is redirected to the NoPayn secure payment page
-4. After payment, customer returns to your store with order status updated
-5. A webhook ensures the order is updated even if the customer doesn't return
+1. The customer selects `NoPayn Checkout`.
+2. On confirm, the extension creates a NoPayn order through the API.
+3. The customer is redirected to NoPayn's secure hosted payment page.
+4. The store receives the customer return callback and a server-to-server webhook.
+5. The order history is updated based on the final NoPayn payment status.
 
-No card data touches your server — fully PCI DSS compliant.
+## Release Process
+
+Pushing a `v*` tag triggers the GitHub Actions workflow in `.github/workflows/package-release.yml`, which builds the OC3-compatible `.ocmod.zip` package and attaches it to the GitHub release automatically.
 
 ## License
 
