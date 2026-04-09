@@ -1,6 +1,7 @@
 <?php
 class ControllerExtensionPaymentNopayn extends Controller {
 	private const API_BASE_URL = 'https://api.nopayn.co.uk';
+	private const DEFAULT_EXPIRATION_MINUTES = 5;
 	private const ALLOWED_MODULES = array(
 		'nopayn_card',
 		'nopayn_applepay',
@@ -104,6 +105,12 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			'transactions' => $transaction_entries
 		);
 
+		$expiration_minutes = $this->getExpirationMinutes();
+
+		if ($expiration_minutes > 0) {
+			$params['expiration_period'] = 'PT' . $expiration_minutes . 'M';
+		}
+
 		$order_lines = $this->buildOrderLines($order_id, $currency, $currency_value);
 
 		if ($order_lines) {
@@ -116,7 +123,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			$params['locale'] = self::LOCALE_MAP[$language_code];
 		}
 
-		$this->log('confirm: Creating order for shop order #' . $order_id . ' module=' . $module_code . ' method=' . $requested_payment_method . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode);
+		$this->log('confirm: Creating order for shop order #' . $order_id . ' module=' . $module_code . ' method=' . $requested_payment_method . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode . ' expiration_minutes=' . $expiration_minutes);
 
 		$response = $this->apiRequest('POST', '/v1/orders/', $api_key, $params);
 
@@ -578,6 +585,12 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		if ($module_code && in_array($module_code, self::ALLOWED_MODULES, true)) {
 			$this->load->language('extension/payment/' . $module_code);
 		}
+	}
+
+	private function getExpirationMinutes() {
+		$value = (int)$this->config->get('payment_nopayn_expiration_minutes');
+
+		return $value > 0 ? $value : self::DEFAULT_EXPIRATION_MINUTES;
 	}
 
 	private function resolvePaymentUrl($response) {

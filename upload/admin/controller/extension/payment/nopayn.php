@@ -12,6 +12,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$post_data = $this->request->post;
 			$post_data['payment_nopayn_status'] = 1;
+			$post_data['payment_nopayn_expiration_minutes'] = $this->normaliseExpirationMinutes(isset($post_data['payment_nopayn_expiration_minutes']) ? $post_data['payment_nopayn_expiration_minutes'] : 5);
 			$this->model_setting_setting->editSetting('payment_nopayn', $post_data);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -47,6 +48,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 
 		$config_keys = array(
 			'payment_nopayn_api_key',
+			'payment_nopayn_expiration_minutes',
 			'payment_nopayn_order_status_id',
 			'payment_nopayn_pending_status_id',
 			'payment_nopayn_cancelled_status_id',
@@ -87,6 +89,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		$this->load->model('setting/setting');
 		$settings = $this->model_setting_setting->getSetting('payment_nopayn');
 		$settings['payment_nopayn_status'] = 1;
+		$settings['payment_nopayn_expiration_minutes'] = isset($settings['payment_nopayn_expiration_minutes']) ? $this->normaliseExpirationMinutes($settings['payment_nopayn_expiration_minutes']) : 5;
 		$this->model_setting_setting->editSetting('payment_nopayn', $settings);
 	}
 
@@ -101,5 +104,11 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	private function normaliseExpirationMinutes($value) {
+		$value = (int)$value;
+
+		return $value > 0 ? $value : 5;
 	}
 }

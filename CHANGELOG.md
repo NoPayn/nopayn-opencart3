@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-04-09 - v3.1.0
+
+- Added a global `Checkout Expiry (Minutes)` setting with a default of `5`.
+- The payment module now sends Cost+ an `expiration_period` when creating orders so abandoned sessions can expire automatically instead of staying open for the gateway default.
+- Documented that OpenCart order status changes from pending to cancelled on expiry still depend on the Cost+ webhook reaching the store.
+
 ## 2026-04-09 - v3.0.2
 
 - Constrained the Cost+ admin payment-list logo to a standard gateway-logo size so it no longer renders at the source image's full dimensions.

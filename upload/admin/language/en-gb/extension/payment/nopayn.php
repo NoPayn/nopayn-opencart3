@@ -17,6 +17,7 @@ $_['text_checkout_modules_help']             = 'Install and configure the separa
 
 // Entry
 $_['entry_api_key']                          = 'API Key';
+$_['entry_expiration_minutes']               = 'Checkout Expiry (Minutes)';
 $_['entry_order_status']                     = 'Completed Order Status';
 $_['entry_pending_status']                   = 'Pending Order Status';
 $_['entry_cancelled_status']                 = 'Cancelled Order Status';
@@ -30,6 +31,7 @@ $_['entry_debug_logging']                    = 'Debug Logging';
 
 // Help
 $_['help_api_key']                           = 'Your Cost+ API key from the Cost+ merchant portal.';
+$_['help_expiration_minutes']                = 'How many minutes a hosted payment session may stay open before Cost+ expires it. Default: 5. The OpenCart order will move from pending to your cancelled status when the expiry webhook reaches the store.';
 $_['help_order_status']                      = 'Order status applied after a successful payment.';
 $_['help_pending_status']                    = 'Order status while the payment is processing.';
 $_['help_cancelled_status']                  = 'Order status when the payment is cancelled, expired, or fails.';

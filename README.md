@@ -56,6 +56,7 @@ Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)`
 5. Install `Cost+ - Global Settings`.
 6. Open `Cost+ - Global Settings` and configure:
    - API key
+   - checkout expiry in minutes
    - completed, pending, and cancelled order statuses
    - available Cost+ methods your merchant account is approved for
    - optional card manual capture
@@ -86,11 +87,16 @@ The customer chooses one checkout label such as `Card Payments`, `Apple Pay`, or
 
 Apple Pay has an additional platform restriction from the current Cost+ documentation: it cannot be tested in test mode and requires a live project plus a real Apple device with Apple Wallet.
 
+By default, the module now creates orders with a `5` minute expiry window. Cost+ should mark abandoned payment sessions as `expired` after that timeout, and the module will move the OpenCart order to your configured cancelled status when the expiry webhook arrives.
+
+If orders still remain pending long after the timeout, that points to a webhook delivery problem rather than the expiry setting itself.
+
 ## Global vs Per-Method Settings
 
 `Cost+ - Global Settings` stores shared configuration once:
 
 - API key
+- checkout expiry timeout
 - order status mapping
 - debug logging
 - method availability in your Cost+ merchant account
@@ -110,6 +116,8 @@ Version `3.0.0` replaced that combined wallet module with separate Apple Pay and
 
 Version `3.0.1` keeps the same functionality but rebrands the admin-facing module names from `NoPayn` to `Cost+` and adds the Cost+ logo to the payment extension list.
 
+Version `3.1.0` adds a configurable checkout expiry timeout and sends that timeout to Cost+ as the order `expiration_period`.
+
 When upgrading:
 
 1. Upload the new package.
@@ -124,6 +132,8 @@ When upgrading:
    - `catalog/controller/extension/payment/nopayn_wallets.php`
    - `catalog/language/en-gb/extension/payment/nopayn_wallets.php`
    - `catalog/model/extension/payment/nopayn_wallets.php`
+
+When moving to `v3.1.0`, review the new `Checkout Expiry (Minutes)` value in `Cost+ - Global Settings`. The default is `5`.
 
 ## Build the Installer Package Locally
 

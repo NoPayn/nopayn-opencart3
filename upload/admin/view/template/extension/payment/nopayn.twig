@@ -35,6 +35,13 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-expiration-minutes"><span data-toggle="tooltip" title="{{ help_expiration_minutes }}">{{ entry_expiration_minutes }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="payment_nopayn_expiration_minutes" value="{{ payment_nopayn_expiration_minutes }}" placeholder="{{ entry_expiration_minutes }}" id="input-expiration-minutes" class="form-control" />
+            </div>
+          </div>
+
           <fieldset>
             <legend>{{ text_payment_methods }}</legend>
             <p class="help-block">{{ text_payment_methods_help }}</p>
