@@ -1,19 +1,21 @@
-# NoPayn Checkout for ocStore 3 / OpenCart 3
+# Cost+ Checkout for ocStore 3 / OpenCart 3
 
-Accept payments via NoPayn in ocStore 3.x and OpenCart 3.x stores.
+Accept payments via Cost+ in ocStore 3.x and OpenCart 3.x stores.
+
+The module is branded as `Cost+` in the OpenCart admin, while the underlying integration continues to use the existing NoPayn API base URL and internal setting keys for compatibility.
 
 ## Architecture
 
 Version `3.x` uses a multi-extension setup similar to Revolut:
 
-- `NoPayn - Global Settings`
-- `NoPayn - Card Payments`
-- `NoPayn - Apple Pay`
-- `NoPayn - Google Pay`
-- `NoPayn - Vipps MobilePay`
-- `NoPayn - Swish`
+- `Cost+ - Global Settings`
+- `Cost+ - Card Payments`
+- `Cost+ - Apple Pay`
+- `Cost+ - Google Pay`
+- `Cost+ - Vipps MobilePay`
+- `Cost+ - Swish`
 
-The admin keeps the `NoPayn - ...` naming, while the customer-facing checkout labels are method-first:
+The admin keeps the `Cost+ - ...` naming, while the customer-facing checkout labels are method-first:
 
 - `Card Payments`
 - `Apple Pay`
@@ -29,13 +31,13 @@ The admin keeps the `NoPayn - ...` naming, while the customer-facing checkout la
 - Vipps / MobilePay
 - Swish
 
-Each checkout module creates a NoPayn order for exactly one payment method so the storefront checkout options stay aligned with the Order API redirect flow.
+Each checkout module creates a Cost+ order for exactly one payment method so the storefront checkout options stay aligned with the Order API redirect flow.
 
 ## Requirements
 
 - ocStore 3.0.x or OpenCart 3.0.3.x
 - PHP 7.4 or later
-- A NoPayn merchant account
+- A Cost+ merchant account
 
 ## Release Assets
 
@@ -51,19 +53,19 @@ Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)`
 2. In admin, go to `Extensions -> Installer`.
 3. Upload the `.ocmod.zip` file.
 4. Go to `Extensions -> Extensions -> Payments`.
-5. Install `NoPayn - Global Settings`.
-6. Open `NoPayn - Global Settings` and configure:
+5. Install `Cost+ - Global Settings`.
+6. Open `Cost+ - Global Settings` and configure:
    - API key
    - completed, pending, and cancelled order statuses
-   - available NoPayn methods your merchant account is approved for
+   - available Cost+ methods your merchant account is approved for
    - optional card manual capture
    - optional debug logging
 7. Install and configure the checkout modules you want to expose:
-   - `NoPayn - Card Payments`
-   - `NoPayn - Apple Pay`
-   - `NoPayn - Google Pay`
-   - `NoPayn - Vipps MobilePay`
-   - `NoPayn - Swish`
+   - `Cost+ - Card Payments`
+   - `Cost+ - Apple Pay`
+   - `Cost+ - Google Pay`
+   - `Cost+ - Vipps MobilePay`
+   - `Cost+ - Swish`
 8. For each checkout module, set:
    - status
    - geo zone
@@ -80,18 +82,18 @@ Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)`
 
 Each checkout module is a separate OpenCart payment extension. This is the most reliable way to get multiple radio options in OpenCart 3 and Simple Checkout.
 
-The customer chooses one checkout label such as `Card Payments`, `Apple Pay`, or `Google Pay`. After confirming, the extension creates a NoPayn hosted payment order for that single method and redirects the customer to the secure NoPayn page.
+The customer chooses one checkout label such as `Card Payments`, `Apple Pay`, or `Google Pay`. After confirming, the extension creates a Cost+ hosted payment order for that single method and redirects the customer to the secure payment page.
 
 Apple Pay has an additional platform restriction from the current Cost+ documentation: it cannot be tested in test mode and requires a live project plus a real Apple device with Apple Wallet.
 
 ## Global vs Per-Method Settings
 
-`NoPayn - Global Settings` stores shared configuration once:
+`Cost+ - Global Settings` stores shared configuration once:
 
 - API key
 - order status mapping
 - debug logging
-- method availability in your NoPayn merchant account
+- method availability in your Cost+ merchant account
 - card manual capture
 
 Each checkout module stores its own storefront behavior:
@@ -104,16 +106,19 @@ Each checkout module stores its own storefront behavior:
 
 Version `2.0.0` exposed a combined wallet module called `NoPayn - Apple Pay / Google Pay`.
 
-Version `3.0.0` replaces that combined wallet module with separate Apple Pay and Google Pay payment extensions.
+Version `3.0.0` replaced that combined wallet module with separate Apple Pay and Google Pay payment extensions.
+
+Version `3.0.1` keeps the same functionality but rebrands the admin-facing module names from `NoPayn` to `Cost+` and adds the Cost+ logo to the payment extension list.
 
 When upgrading:
 
 1. Upload the new package.
-2. In `Extensions -> Extensions -> Payments`, keep using `NoPayn - Global Settings` for the shared API key and status mapping.
-3. Uninstall and disable `NoPayn - Apple Pay / Google Pay`.
-4. Install and enable `NoPayn - Apple Pay` and `NoPayn - Google Pay`.
+2. In `Extensions -> Extensions -> Payments`, keep using `Cost+ - Global Settings` for the shared API key and status mapping.
+3. Uninstall and disable `NoPayn - Apple Pay / Google Pay` if you are upgrading from the old combined wallet version.
+4. Install and enable `Cost+ - Apple Pay` and `Cost+ - Google Pay`.
 5. Review the global settings and confirm the Apple Pay and Google Pay availability switches are enabled only for methods approved on your merchant account.
-6. If the old combined wallet entry still appears after upgrading, remove these legacy files from the store because the OpenCart 3 installer does not delete removed files automatically:
+6. After uploading `v3.0.1`, the payment extension list should show the Cost+ logo in the second column for each Cost+ payment module.
+7. If the old combined wallet entry still appears after upgrading, remove these legacy files from the store because the OpenCart 3 installer does not delete removed files automatically:
    - `admin/controller/extension/payment/nopayn_wallets.php`
    - `admin/language/en-gb/extension/payment/nopayn_wallets.php`
    - `catalog/controller/extension/payment/nopayn_wallets.php`

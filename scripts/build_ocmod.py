@@ -38,6 +38,7 @@ def main() -> None:
         "upload/admin/controller/extension/payment/nopayn_vippsmobilepay.php",
         "upload/admin/controller/extension/payment/nopayn_swishpay.php",
         "upload/admin/model/extension/payment/nopayn.php",
+        "upload/admin/view/image/payment/costpluslogo_blackgreen.png",
         "upload/admin/view/template/extension/payment/nopayn_method.twig",
         "upload/catalog/controller/extension/payment/nopayn.php",
         "upload/catalog/controller/extension/payment/nopayn_applepay.php",
