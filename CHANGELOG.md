@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-04-09 - v3.0.2
+
+- Constrained the Cost+ admin payment-list logo to a standard gateway-logo size so it no longer renders at the source image's full dimensions.
+
 ## 2026-04-09 - v3.0.1
 
 - Rebranded the admin-facing module names from `NoPayn` to `Cost+` while keeping the existing NoPayn API integration and internal extension codes unchanged.

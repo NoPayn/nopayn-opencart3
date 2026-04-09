@@ -7,7 +7,7 @@ $_['nopayn_heading_title']                   = 'Cost+ - Global Settings';
 $_['text_extension']                         = 'Extensions';
 $_['text_success']                           = 'Success: You have modified Cost+ global settings!';
 $_['text_edit']                              = 'Edit Cost+ - Global Settings';
-$_['text_nopayn']                            = '<a target="_blank" href="https://docs.costplus.io"><img src="view/image/payment/costpluslogo_blackgreen.png" alt="Cost+" title="Cost+" style="border: 1px solid #EEEEEE;" /></a>';
+$_['text_nopayn']                            = '<a target="_blank" href="https://docs.costplus.io"><img src="view/image/payment/costpluslogo_blackgreen.png" alt="Cost+" title="Cost+" style="max-width: 140px; max-height: 32px; width: auto; height: auto; border: 1px solid #EEEEEE;" /></a>';
 $_['text_all_zones']                         = 'All Zones';
 $_['text_enabled']                           = 'Enabled';
 $_['text_disabled']                          = 'Disabled';
