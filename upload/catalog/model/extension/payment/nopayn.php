@@ -40,18 +40,11 @@ class ModelExtensionPaymentNopayn extends Model {
 			case 'nopayn_card':
 				return $this->config->get('payment_nopayn_creditcard') ? array('credit-card') : array();
 
-			case 'nopayn_wallets':
-				$methods = array();
+			case 'nopayn_applepay':
+				return $this->config->get('payment_nopayn_applepay') ? array('apple-pay') : array();
 
-				if ($this->config->get('payment_nopayn_applepay')) {
-					$methods[] = 'apple-pay';
-				}
-
-				if ($this->config->get('payment_nopayn_googlepay')) {
-					$methods[] = 'google-pay';
-				}
-
-				return $methods;
+			case 'nopayn_googlepay':
+				return $this->config->get('payment_nopayn_googlepay') ? array('google-pay') : array();
 
 			case 'nopayn_vippsmobilepay':
 				return $this->config->get('payment_nopayn_mobilepay') ? array('vipps-mobilepay') : array();
@@ -149,22 +142,6 @@ class ModelExtensionPaymentNopayn extends Model {
 	}
 
 	private function getCheckoutTitle($module_code) {
-		if ($module_code === 'nopayn_wallets') {
-			$requested_methods = $this->getRequestedPaymentMethods($module_code);
-
-			if ($requested_methods === array('apple-pay')) {
-				$value = $this->language->get('text_title_apple');
-
-				return $value !== 'text_title_apple' ? $value : 'Apple Pay';
-			}
-
-			if ($requested_methods === array('google-pay')) {
-				$value = $this->language->get('text_title_google');
-
-				return $value !== 'text_title_google' ? $value : 'Google Pay';
-			}
-		}
-
 		$value = $this->language->get('text_title');
 
 		return $value !== 'text_title' ? $value : 'Payment';

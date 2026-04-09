@@ -1,17 +1,17 @@
 <?php
-class ControllerExtensionPaymentNopaynWallets extends Controller {
+class ControllerExtensionPaymentNopaynGooglepay extends Controller {
 	private $error = array();
 
 	public function index() {
 		$this->load->language('extension/payment/nopayn');
-		$this->load->language('extension/payment/nopayn_wallets');
+		$this->load->language('extension/payment/nopayn_googlepay');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/setting');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('payment_nopayn_wallets', $this->request->post);
+			$this->model_setting_setting->editSetting('payment_nopayn_googlepay', $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -20,13 +20,13 @@ class ControllerExtensionPaymentNopaynWallets extends Controller {
 
 		$data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
 		$data['breadcrumbs'] = $this->getBreadcrumbs();
-		$data['action'] = $this->url->link('extension/payment/nopayn_wallets', 'user_token=' . $this->session->data['user_token'], true);
+		$data['action'] = $this->url->link('extension/payment/nopayn_googlepay', 'user_token=' . $this->session->data['user_token'], true);
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
 		$data['global_settings_href'] = $this->url->link('extension/payment/nopayn', 'user_token=' . $this->session->data['user_token'], true);
-		$data['module_prefix'] = 'payment_nopayn_wallets';
-		$data['module_geo_zone_id'] = isset($this->request->post['payment_nopayn_wallets_geo_zone_id']) ? $this->request->post['payment_nopayn_wallets_geo_zone_id'] : $this->config->get('payment_nopayn_wallets_geo_zone_id');
-		$data['module_status'] = isset($this->request->post['payment_nopayn_wallets_status']) ? $this->request->post['payment_nopayn_wallets_status'] : $this->config->get('payment_nopayn_wallets_status');
-		$data['module_sort_order'] = isset($this->request->post['payment_nopayn_wallets_sort_order']) ? $this->request->post['payment_nopayn_wallets_sort_order'] : $this->config->get('payment_nopayn_wallets_sort_order');
+		$data['module_prefix'] = 'payment_nopayn_googlepay';
+		$data['module_geo_zone_id'] = isset($this->request->post['payment_nopayn_googlepay_geo_zone_id']) ? $this->request->post['payment_nopayn_googlepay_geo_zone_id'] : $this->config->get('payment_nopayn_googlepay_geo_zone_id');
+		$data['module_status'] = isset($this->request->post['payment_nopayn_googlepay_status']) ? $this->request->post['payment_nopayn_googlepay_status'] : $this->config->get('payment_nopayn_googlepay_status');
+		$data['module_sort_order'] = isset($this->request->post['payment_nopayn_googlepay_sort_order']) ? $this->request->post['payment_nopayn_googlepay_sort_order'] : $this->config->get('payment_nopayn_googlepay_sort_order');
 
 		$this->load->model('localisation/geo_zone');
 		$data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
@@ -47,7 +47,7 @@ class ControllerExtensionPaymentNopaynWallets extends Controller {
 	}
 
 	protected function validate() {
-		if (!$this->user->hasPermission('modify', 'extension/payment/nopayn_wallets')) {
+		if (!$this->user->hasPermission('modify', 'extension/payment/nopayn_googlepay')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
@@ -66,7 +66,7 @@ class ControllerExtensionPaymentNopaynWallets extends Controller {
 			),
 			array(
 				'text' => $this->language->get('heading_title'),
-				'href' => $this->url->link('extension/payment/nopayn_wallets', 'user_token=' . $this->session->data['user_token'], true)
+				'href' => $this->url->link('extension/payment/nopayn_googlepay', 'user_token=' . $this->session->data['user_token'], true)
 			)
 		);
 	}

@@ -10,9 +10,9 @@ $_['text_edit']                              = 'Edit NoPayn - Global Settings';
 $_['text_all_zones']                         = 'All Zones';
 $_['text_enabled']                           = 'Enabled';
 $_['text_disabled']                          = 'Disabled';
-$_['text_payment_methods']                    = 'Available NoPayn Methods';
-$_['text_payment_methods_help']               = 'Enable the NoPayn methods your merchant account is approved to offer. The separate NoPayn checkout modules use these switches.';
-$_['text_checkout_modules_help']              = 'Install and configure the separate NoPayn payment extensions to control checkout labels, geo zones, and sort order.';
+$_['text_payment_methods']                   = 'Available NoPayn Methods';
+$_['text_payment_methods_help']              = 'Enable the NoPayn methods your merchant account is approved to offer. The separate NoPayn checkout modules use these switches.';
+$_['text_checkout_modules_help']             = 'Install and configure the separate NoPayn payment extensions to control checkout labels, geo zones, and sort order. Apple Pay and Google Pay now use separate checkout modules.';
 
 // Entry
 $_['entry_api_key']                          = 'API Key';
@@ -24,7 +24,7 @@ $_['entry_creditcard_manual_capture']        = 'Manual Capture (Credit Card)';
 $_['entry_applepay']                         = 'Apple Pay';
 $_['entry_googlepay']                        = 'Google Pay';
 $_['entry_mobilepay']                        = 'Vipps / MobilePay';
-$_['entry_swish']                             = 'Swish';
+$_['entry_swish']                            = 'Swish';
 $_['entry_debug_logging']                    = 'Debug Logging';
 
 // Help
@@ -36,4 +36,4 @@ $_['help_creditcard_manual_capture']         = 'When enabled, credit card paymen
 $_['help_debug_logging']                     = 'Write NoPayn API requests, responses, and webhook events to the store log.';
 
 // Error
-$_['error_permission']                        = 'Warning: You do not have permission to modify NoPayn global settings!';
+$_['error_permission']                       = 'Warning: You do not have permission to modify NoPayn global settings!';

@@ -4,22 +4,22 @@ Accept payments via NoPayn in ocStore 3.x and OpenCart 3.x stores.
 
 ## Architecture
 
-Version `2.x` uses a multi-extension setup similar to Revolut:
+Version `3.x` uses a multi-extension setup similar to Revolut:
 
 - `NoPayn - Global Settings`
 - `NoPayn - Card Payments`
-- `NoPayn - Apple Pay / Google Pay`
+- `NoPayn - Apple Pay`
+- `NoPayn - Google Pay`
 - `NoPayn - Vipps MobilePay`
 - `NoPayn - Swish`
 
 The admin keeps the `NoPayn - ...` naming, while the customer-facing checkout labels are method-first:
 
 - `Card Payments`
-- `Apple Pay & Google Pay`
+- `Apple Pay`
+- `Google Pay`
 - `Vipps MobilePay`
 - `Swish`
-
-If only one wallet is enabled globally, the wallet checkout label automatically becomes `Apple Pay` or `Google Pay`.
 
 ## Supported Payment Flows
 
@@ -29,7 +29,7 @@ If only one wallet is enabled globally, the wallet checkout label automatically 
 - Vipps / MobilePay
 - Swish
 
-The `Apple Pay / Google Pay` checkout module sends both methods in the NoPayn `transactions` array and prefers the returned `order_url` so the hosted NoPayn page can offer both wallet methods in one flow.
+Each checkout module creates a NoPayn order for exactly one payment method so the storefront checkout options stay aligned with the Order API redirect flow.
 
 ## Requirements
 
@@ -60,7 +60,8 @@ Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)`
    - optional debug logging
 7. Install and configure the checkout modules you want to expose:
    - `NoPayn - Card Payments`
-   - `NoPayn - Apple Pay / Google Pay`
+   - `NoPayn - Apple Pay`
+   - `NoPayn - Google Pay`
    - `NoPayn - Vipps MobilePay`
    - `NoPayn - Swish`
 8. For each checkout module, set:
@@ -79,7 +80,9 @@ Do not use GitHub's auto-generated `Source code (zip)` or `Source code (tar.gz)`
 
 Each checkout module is a separate OpenCart payment extension. This is the most reliable way to get multiple radio options in OpenCart 3 and Simple Checkout.
 
-The customer chooses one checkout label such as `Card Payments` or `Apple Pay & Google Pay`. After confirming, the extension creates a NoPayn hosted payment order and redirects the customer to the secure NoPayn page.
+The customer chooses one checkout label such as `Card Payments`, `Apple Pay`, or `Google Pay`. After confirming, the extension creates a NoPayn hosted payment order for that single method and redirects the customer to the secure NoPayn page.
+
+Apple Pay has an additional platform restriction from the current Cost+ documentation: it cannot be tested in test mode and requires a live project plus a real Apple device with Apple Wallet.
 
 ## Global vs Per-Method Settings
 
@@ -97,19 +100,25 @@ Each checkout module stores its own storefront behavior:
 - geo zone
 - sort order
 
-## Upgrade Guide from v1.0.0
+## Upgrade Guide from v2.0.0
 
-Version `1.0.0` exposed one storefront method called `NoPayn Checkout`.
+Version `2.0.0` exposed a combined wallet module called `NoPayn - Apple Pay / Google Pay`.
 
-Version `2.0.0` changes that to one shared admin settings module plus separate checkout-facing payment extensions.
+Version `3.0.0` replaces that combined wallet module with separate Apple Pay and Google Pay payment extensions.
 
 When upgrading:
 
 1. Upload the new package.
-2. In `Extensions -> Extensions -> Payments`, your existing `NoPayn Checkout` entry becomes `NoPayn - Global Settings`.
-3. Review and save the global settings.
-4. Install and enable the new checkout modules you want customers to see.
-5. Stop using the old single-method storefront flow.
+2. In `Extensions -> Extensions -> Payments`, keep using `NoPayn - Global Settings` for the shared API key and status mapping.
+3. Uninstall and disable `NoPayn - Apple Pay / Google Pay`.
+4. Install and enable `NoPayn - Apple Pay` and `NoPayn - Google Pay`.
+5. Review the global settings and confirm the Apple Pay and Google Pay availability switches are enabled only for methods approved on your merchant account.
+6. If the old combined wallet entry still appears after upgrading, remove these legacy files from the store because the OpenCart 3 installer does not delete removed files automatically:
+   - `admin/controller/extension/payment/nopayn_wallets.php`
+   - `admin/language/en-gb/extension/payment/nopayn_wallets.php`
+   - `catalog/controller/extension/payment/nopayn_wallets.php`
+   - `catalog/language/en-gb/extension/payment/nopayn_wallets.php`
+   - `catalog/model/extension/payment/nopayn_wallets.php`
 
 ## Build the Installer Package Locally
 

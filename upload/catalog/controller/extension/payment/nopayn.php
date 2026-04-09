@@ -3,7 +3,8 @@ class ControllerExtensionPaymentNopayn extends Controller {
 	private const API_BASE_URL = 'https://api.nopayn.co.uk';
 	private const ALLOWED_MODULES = array(
 		'nopayn_card',
-		'nopayn_wallets',
+		'nopayn_applepay',
+		'nopayn_googlepay',
 		'nopayn_vippsmobilepay',
 		'nopayn_swishpay'
 	);
@@ -38,8 +39,9 @@ class ControllerExtensionPaymentNopayn extends Controller {
 
 		$requested_payment_methods = $this->model_extension_payment_nopayn->getRequestedPaymentMethods($module_code);
 		$transaction_entries = $this->model_extension_payment_nopayn->getTransactionEntries($module_code);
+		$requested_payment_method = isset($requested_payment_methods[0]) ? $requested_payment_methods[0] : '';
 
-		if (!$module_code || !$requested_payment_methods || !$transaction_entries) {
+		if (!$module_code || !$requested_payment_method || !$transaction_entries) {
 			$json['error'] = $this->language->get('error_payment_method');
 			$this->respondJson($json);
 			return;
@@ -114,7 +116,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 			$params['locale'] = self::LOCALE_MAP[$language_code];
 		}
 
-		$this->log('confirm: Creating order for shop order #' . $order_id . ' module=' . $module_code . ' methods=' . implode(',', $requested_payment_methods) . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode);
+		$this->log('confirm: Creating order for shop order #' . $order_id . ' module=' . $module_code . ' method=' . $requested_payment_method . ' amount=' . $amount_cents . ' currency=' . $currency . ' capture_mode=' . $capture_mode);
 
 		$response = $this->apiRequest('POST', '/v1/orders/', $api_key, $params);
 
@@ -125,7 +127,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		}
 
 		$nopayn_order_id = isset($response['id']) ? $response['id'] : '';
-		$payment_url = $this->resolvePaymentUrl($response, count($transaction_entries) > 1);
+		$payment_url = $this->resolvePaymentUrl($response);
 		$nopayn_transaction_id = $this->extractTransactionValue($response, 'id');
 
 		if (!$nopayn_order_id || !$payment_url) {
@@ -137,7 +139,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		$this->model_extension_payment_nopayn->addTransaction(
 			$order_id,
 			$nopayn_order_id,
-			implode(',', $requested_payment_methods),
+			$requested_payment_method,
 			$amount_cents,
 			$currency,
 			$capture_mode,
@@ -578,11 +580,7 @@ class ControllerExtensionPaymentNopayn extends Controller {
 		}
 	}
 
-	private function resolvePaymentUrl($response, $prefer_order_url) {
-		if ($prefer_order_url && !empty($response['order_url'])) {
-			return $response['order_url'];
-		}
-
+	private function resolvePaymentUrl($response) {
 		if (!empty($response['transactions']) && is_array($response['transactions'])) {
 			foreach ($response['transactions'] as $transaction) {
 				if (!empty($transaction['payment_url'])) {
